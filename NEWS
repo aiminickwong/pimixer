@@ -1,0 +1,116 @@
+4.8.0
+=====
+- Fix too small plugin button in the new panel.
+- Ellipsize sound card names in the combo box (bug #6671).
+- Remove deprecated Encoding key from desktop files.
+- Port to libxfce4ui.
+- Fix wrong use of GTK+ causing the panel plugin volume to be set no higher
+  than 90% (bug #5243).
+- Fixed a lot of compiler warnnings and errors.
+- Updated translations: Dutch, English (United Kingdom), Galician, Greek,
+  Italian, Kazakh, Portuguese, Romanian, Russian, Sinhala, Turkish, 
+  Uyghur and more.
+
+
+4.6.1
+=====
+- Translation updates: es (Abel Martín), pl (Piotr Sokół),
+  gl (Leandro Regueiro), pt (Nuno Miguel), it (Cristian Marchi)
+- Make <Control>q and <Control>s trigger the corresponding actions.
+- Minor cosmetic fixes (row spacing of 6px in tables).
+- Add missing AudioVideo category which is obligatory if you use the Audio 
+  category (bug #4933).
+- Display mute/record state properly on startup (bug #5002). 
+- Fix segfault when destroying the plugin
+- Move capture track check into xfce_mixer_track_update_record().
+- Don't increment the reference count on GObjects when passing them to GValue 
+  using g_value_set_object().
+- Fix crash with backends where the GstMixer implementation has no 
+  "device-name" property (bug #5201).
+- Include libxfcegui4.h to avoid implicit declaration of xfce_err().
+
+
+4.6.0
+=====
+- Translation updates: sv (Daniel Nylander), gl (Leandro Regueiro),
+  uk (Dmitry Nikitin), tr (Gökmen Görgen, Samed Beyribey),
+  es (Abel Martín), de (Enrico Tröger), id (Andhika Padmawan),
+  nb (Terje Uriansrud), pl (Piotr Sokół)
+- Don't read track labels from the 'label' member of the GstMixerTrack struct. 
+  Instead, use the 'label' property. The struct member is undocumented and may 
+- Use the GstMixerTrack "label" property instead of the struct member to access
+  the name of a track. Toggle record for capture tracks instead of trying to 
+  mute them. Capture tracks don't support muting (bug #4777).
+- Don't show the mute button for capture tracks (follow up of bug #4777). 
+
+4.5.99.1
+========
+- Translation updates: cz (Michal Varady), da (Per Kongstad), 
+  eu (Piarres Beobide), fr (Mike Massonnet), nb_NO (Terje Uriansrud),
+  pt_BR (Og Maciel), zh_CN (Chris K. Zhang).
+
+4.5.93
+======
+- Change plugin volume step size from 1% to 5%.
+- Use "multimedia-volume-control" icon as the default window icon 
+  instead of "xfce4-mixer".
+- Review strings.
+- Translation updates: cs (Michal Varady), de (Fabian Nowak), es (Abel 
+  Martín), eu (Piarres Beobide), fi (Jari Rahkonen), fr (Maximilian 
+  Schleiss), gl (Leandro Regueiro), hu (Szervác Attila), ja (Nobohiro
+  Iwamatsu), sv (Daniel Nylander), uk (Dmitry Nikitin).
+
+4.5.92
+======
+- Use xfconf_channel_reset_property() instead
+  xfconf_channel_remove_property().
+- Rename stock icons and install them as application icons to
+  $(pkgdatadir)/icons/hicolor. Remove stock code.
+- Change step and page increment size of the panel plugin to 1%.
+- Fix license headers to use GPL everywhere.
+- Use "multimedia-volume-control" icon in the desktop entry.
+- Fix build with GStreamer < 0.10.14.
+- Translation updates: Carles Muños Gorriz (ca), Abel Martín (es),
+  Csécsey Károly (hu). Andhika Padmawan (id), Terje Uriansrud (nb_NO)
+  Gökmen Görgen (tr).
+
+4.5.91
+======
+- Remove XfceMixerCard abstraction over GstMixer.
+- Use a single GstBus for all GstMixer notifications.
+- Use 'multimedia-volume-control' icon instead of 'xfce4-mixer'.
+- Improve panel plugin icons, add another icon for volume between 0% 
+  and 15%.
+- Panel plugin now refreshes properly after using the plugin properties
+  dialog (fixes bug #4370).
+- Improve .desktop file: add the mixer to the "Audio" and "X-XFCE"
+  categories, and add StartupNotify=true and Terminal=false.
+- Add DEBUG define to make the DBG macro work.
+- Translation updates: Brazilian Portuguese, Czech, Finnish, French, 
+  German, Hungarian, Indonesian, Japanese, Sinhalese, Spanish.
+
+4.5.90
+======
+- Complete rewrite based on GStreamer 0.10.
+- Supports all sound systems supported by GStreamer (ALSA, OSS, 
+  PulseAudio and many more).
+- Support for multiple sound cards.
+- New panel plugin especially designed for easy use with the mouse 
+  scroll wheel.
+
+4.4.0
+=====
+- Several new and updated translations.
+
+
+4.3.90.1
+========
+- Port to the new panel framework.
+- Support for SGI mixer.
+
+
+4.2.0
+=====
+- Complete rewrite of the mixer with settings manager dialog.
+- Support for mixer profiles.
+- Support for ALSA, OSS and Sun Audio.
