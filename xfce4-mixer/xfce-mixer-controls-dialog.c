@@ -55,12 +55,12 @@ static void   xfce_mixer_controls_dialog_control_toggled      (GtkCellRendererTo
 
 struct _XfceMixerControlsDialogClass
 {
-  XfceTitledDialogClass __parent__;
+  GtkDialogClass __parent__;
 };
 
 struct _XfceMixerControlsDialog
 {
-  XfceTitledDialog __parent__;
+  GtkDialog __parent__;
 
   XfceMixerWindow      *parent;
   XfceMixerPreferences *preferences;
@@ -96,7 +96,7 @@ xfce_mixer_controls_dialog_get_type (void)
           NULL,
         };
 
-      type = g_type_register_static (XFCE_TYPE_TITLED_DIALOG, "XfceMixerControlsDialog", &info, 0);
+      type = g_type_register_static (gtk_dialog_get_type (), "XfceMixerControlsDialog", &info, 0);
     }
   
   return type;
@@ -134,7 +134,7 @@ xfce_mixer_controls_dialog_init (XfceMixerControlsDialog *dialog)
   gtk_window_set_icon_name (GTK_WINDOW (dialog), "preferences-desktop");
   gtk_window_set_title (GTK_WINDOW (dialog), _("Select Controls"));
 
-  xfce_titled_dialog_set_subtitle (XFCE_TITLED_DIALOG (dialog), _("Select which controls should be visible"));
+  //xfce_titled_dialog_set_subtitle (XFCE_TITLED_DIALOG (dialog), _("Select which controls should be visible"));
 
   button = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
   gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button, GTK_RESPONSE_CLOSE);

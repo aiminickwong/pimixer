@@ -57,12 +57,12 @@ static void     xfce_mixer_window_update_contents        (XfceMixerWindow      *
 
 struct _XfceMixerWindowClass
 {
-  XfceTitledDialogClass __parent__;
+  GtkDialogClass __parent__;
 };
 
 struct _XfceMixerWindow
 {
-  XfceTitledDialog __parent__;
+  GtkDialog __parent__;
 
   XfceMixerPreferences *preferences;
 
@@ -118,7 +118,7 @@ xfce_mixer_window_get_type (void)
           NULL,
         };
 
-      type = g_type_register_static (XFCE_TYPE_TITLED_DIALOG, "XfceMixerWindow", &info, 0);
+      type = g_type_register_static (gtk_dialog_get_type (), "XfceMixerWindow", &info, 0);
 
     }
   
@@ -153,7 +153,6 @@ xfce_mixer_window_init (XfceMixerWindow *window)
   GtkWidget     *hbox;
   GtkWidget     *bbox;
   gchar         *active_card = NULL;
-  gchar         *title;
   guint          i;
   gint           width;
   gint           height;
@@ -168,7 +167,7 @@ xfce_mixer_window_init (XfceMixerWindow *window)
   gtk_window_set_default_size (GTK_WINDOW (window), width, height);
   gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER);
   gtk_dialog_set_has_separator (GTK_DIALOG (window), FALSE);
-  xfce_titled_dialog_set_subtitle (XFCE_TITLED_DIALOG (window), _("Configure sound card(s) and control the volume of selected tracks"));
+  //xfce_titled_dialog_set_subtitle (XFCE_TITLED_DIALOG (window), _("Configure sound card(s) and control the volume of selected tracks"));
 
   g_signal_connect (window, "delete-event", G_CALLBACK (xfce_mixer_window_closed), window);
 
@@ -200,9 +199,7 @@ xfce_mixer_window_init (XfceMixerWindow *window)
   gtk_widget_show (hbox);
 
   label = gtk_label_new (NULL);
-  title = g_strdup_printf ("<span weight='bold' size='large'>%s</span>", _("Sound card:"));
-  gtk_label_set_markup (GTK_LABEL (label), title);
-  g_free (title);
+  gtk_label_set_text (GTK_LABEL (label), _("Sound card:"));
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
   gtk_widget_show (label);
 
@@ -324,7 +321,6 @@ xfce_mixer_window_action_select_controls (GtkAction       *action,
 
   xfce_mixer_window_update_contents (window);
 }
-
 
 
 static void
