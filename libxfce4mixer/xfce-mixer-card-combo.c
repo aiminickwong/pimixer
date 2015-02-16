@@ -182,6 +182,25 @@ xfce_mixer_card_combo_new (GstElement *card)
   return combo;
 }
 
+void xfce_mixer_card_combo_update (XfceMixerCardCombo *combo, GstElement *card)
+{
+  GtkTreeIter      tree_iter;
+  GList           *iter;
+
+  combo->list_store = gtk_list_store_new (2, G_TYPE_STRING, GST_TYPE_ELEMENT);
+  gtk_combo_box_set_model (GTK_COMBO_BOX (combo), GTK_TREE_MODEL (combo->list_store));
+
+  for (iter = xfce_mixer_get_cards (); iter != NULL; iter = g_list_next (iter))
+    {
+      gtk_list_store_append (combo->list_store, &tree_iter);
+      gtk_list_store_set (combo->list_store, &tree_iter, 
+                          NAME_COLUMN, xfce_mixer_get_card_display_name (iter->data),
+                          CARD_COLUMN, iter->data, -1);
+    }
+    
+    _xfce_mixer_card_combo_set_active_card (combo, card);
+}
+
 
 
 static void

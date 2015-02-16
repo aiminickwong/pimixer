@@ -39,7 +39,7 @@ GType       xfce_mixer_card_combo_get_type        (void) G_GNUC_CONST;
 
 GtkWidget  *xfce_mixer_card_combo_new             (GstElement         *element);
 GstElement *xfce_mixer_card_combo_get_active_card (XfceMixerCardCombo *combo);
-
+void xfce_mixer_card_combo_update (XfceMixerCardCombo *combo, GstElement *element);
 G_END_DECLS;
 
 #endif /* !__XFCE_MIXER_CARD_COMBO_H__ */

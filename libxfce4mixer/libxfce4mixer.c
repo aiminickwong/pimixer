@@ -131,7 +131,10 @@ const gchar *
 xfce_mixer_get_card_display_name (GstElement *card)
 {
   g_return_val_if_fail (GST_IS_MIXER (card), NULL);
-  return g_object_get_data (G_OBJECT (card), "xfce-mixer-name");
+  if (xfce_mixer_is_default_card (card))
+  	return g_strconcat (g_object_get_data (G_OBJECT (card), "xfce-mixer-name"), " (Default)", NULL);
+  else
+  	return g_object_get_data (G_OBJECT (card), "xfce-mixer-name");
 }
 
 
@@ -141,6 +144,14 @@ xfce_mixer_get_card_internal_name (GstElement *card)
 {
   g_return_val_if_fail (GST_IS_MIXER (card), NULL);
   return g_object_get_data (G_OBJECT (card), "xfce-mixer-internal-name");
+}
+
+
+const gchar *
+xfce_mixer_get_card_id (GstElement *card)
+{
+  g_return_val_if_fail (GST_IS_MIXER (card), NULL);
+  return g_object_get_data (G_OBJECT (card), "xfce-mixer-id");
 }
 
 
@@ -239,6 +250,7 @@ _xfce_mixer_filter_mixer (GstMixer *mixer,
   gchar             *p;
   gint               length;
   gint              *counter = user_data;
+  gchar *device;
 
   /* Get long name of the mixer element */
   factory = gst_element_get_factory (GST_ELEMENT (mixer));
@@ -248,6 +260,9 @@ _xfce_mixer_filter_mixer (GstMixer *mixer,
   if (g_object_class_find_property (G_OBJECT_GET_CLASS (G_OBJECT (mixer)), "device-name"))
     g_object_get (mixer, "device-name", &device_name, NULL);
   
+  if (g_object_class_find_property (G_OBJECT_GET_CLASS (G_OBJECT (mixer)), "device"))
+    g_object_get (mixer, "device", &device, NULL);
+      
   /* Fall back to default name if neccessary */
   if (G_UNLIKELY (device_name == NULL))
     device_name = g_strdup_printf (_("Unknown Volume Control %d"), (*counter)++);
@@ -260,6 +275,7 @@ _xfce_mixer_filter_mixer (GstMixer *mixer,
 
   /* Set name to be used by xfce4-mixer */
   g_object_set_data_full (G_OBJECT (mixer), "xfce-mixer-name", name, (GDestroyNotify) g_free);
+  g_object_set_data_full (G_OBJECT (mixer), "xfce-mixer-id", device, (GDestroyNotify) g_free);
 
   /* Count alpha-numeric characters in the name */
   for (length = 0, p = name; *p != '\0'; ++p)
@@ -288,3 +304,156 @@ _xfce_mixer_destroy_mixer (GstMixer *mixer)
   gst_element_set_state (GST_ELEMENT (mixer), GST_STATE_NULL);
   gst_object_unref (GST_OBJECT (mixer));
 }
+
+
+void xfce_mixer_set_default_card (char *id)
+{
+  char cmdbuf[256], idbuf[16], type[16], cid[16], *card, *bufptr = cmdbuf, state = 0, indef = 0;
+  int inchar, count;
+  char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
+
+  // Break the id string into the type (before the colon) and the card number (after the colon)
+  strcpy (idbuf, id);
+  card = strchr (idbuf, ':') + 1;
+  *(strchr (idbuf, ':')) = 0;
+ 
+  FILE *fp = fopen (user_config_file, "rb");
+  if (!fp)
+  {
+  	// File does not exist - create it from scratch
+  	fp = fopen (user_config_file, "wb");
+  	fprintf (fp, "pcm.!default {\n\ttype %s\n\tcard %s\n}\n\nctl.!default {\n\ttype %s\n\tcard %s\n}\n", idbuf, card, idbuf, card);
+  	fclose (fp);
+  }
+  else
+  {
+	// File exists - check to see whether it contains a default card
+	type[0] = 0;
+  	cid[0] = 0;
+  	count = 0;
+  	while ((inchar = fgetc (fp)) != EOF)
+  	{
+  		if (inchar == ' ' || inchar == '\t' || inchar == '\n' || inchar == '\r')
+  		{
+  			if (bufptr != cmdbuf)
+  			{
+  				*bufptr = 0;
+  				switch (state)
+  				{
+  					case 1 :	strcpy (type, cmdbuf);
+  						  		state = 0;
+  						  		break;
+   					case 2 :  	strcpy (cid, cmdbuf);
+  						  		state = 0;
+  						  		break;
+  					default : 	if (!strcmp (cmdbuf, "type") && indef) state = 1;
+  						  		else if (!strcmp (cmdbuf, "card") && indef) state = 2;
+  						  		else if (!strcmp (cmdbuf, "pcm.!default")) indef = 1;
+  						  		else if (!strcmp (cmdbuf, "}")) indef = 0;
+  						  		break;
+  				}
+  				bufptr = cmdbuf;
+  				count = 0;
+  				if (cid[0] && type[0]) break;
+  			}
+  			else
+  			{
+  				bufptr = cmdbuf;
+  				count = 0;
+  			}
+  		}
+  		else
+  		{
+  			if (count < 255)
+  			{ 
+  				*bufptr++ = inchar;
+  				count++;
+  			}
+  			else cmdbuf[255] = 0;
+  		}
+  	}
+  	fclose (fp);
+  	if (cid[0] && type[0]) 
+  	{
+  		// This piece of sed is surely self-explanatory...
+  		sprintf (cmdbuf, "sed -i '/pcm.!default\\|ctl.!default/,/}/ { s/type .*/type %s/g; s/card .*/card %s/g; }' %s", idbuf, card, user_config_file);
+  		system (cmdbuf);
+  		// Oh, OK then - it looks for type * and card * within the delimiters pcm.!default or ctl.!default and } and replaces the parameters
+  	}
+  	else
+  	{
+  		// No default card; append to end of file
+  		fp = fopen (user_config_file, "ab");
+  		fprintf (fp, "\n\npcm.!default {\n\ttype %s\n\tcard %s\n}\n\nctl.!default {\n\ttype %s\n\tcard %s\n}\n", idbuf, card, idbuf, card);
+  		fclose (fp);
+  	}
+  }
+  g_free (user_config_file);
+}
+
+
+guint
+xfce_mixer_is_default_card (GstElement *card)
+{
+  g_return_val_if_fail (GST_IS_MIXER (card), 0);
+  
+  char tokenbuf[256], type[16], cid[16], state = 0, indef = 0;
+  char *bufptr = tokenbuf;
+  int inchar, count;
+  char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
+  FILE *fp = fopen (user_config_file, "rb");
+  if (fp)
+  {
+  	type[0] = 0;
+  	cid[0] = 0;
+  	count = 0;
+  	while ((inchar = fgetc (fp)) != EOF)
+  	{
+  		if (inchar == ' ' || inchar == '\t' || inchar == '\n' || inchar == '\r')
+  		{
+  			if (bufptr != tokenbuf)
+  			{
+  				*bufptr = 0;
+  				switch (state)
+  				{
+  					case 1 :	strcpy (type, tokenbuf);
+  						  		state = 0;
+  						  		break;
+   					case 2 :  	strcpy (cid, tokenbuf);
+  						  		state = 0;
+  						  		break;
+  					default : 	if (!strcmp (tokenbuf, "type") && indef) state = 1;
+  						  		else if (!strcmp (tokenbuf, "card") && indef) state = 2;
+  						  		else if (!strcmp (tokenbuf, "pcm.!default")) indef = 1;
+  						  		else if (!strcmp (tokenbuf, "}")) indef = 0;
+  						  		break;
+  				}
+  				bufptr = tokenbuf;
+  				count = 0;
+  				if (cid[0] && type[0]) break;
+  			}
+  			else 
+  			{
+  				bufptr = tokenbuf;
+  				count = 0;
+  			}
+  		}
+  		else 
+  		{
+  			if (count < 255)
+  			{ 
+  				*bufptr++ = inchar;
+  				count++;
+  			}
+  			else tokenbuf[255] = 0;
+  		}
+  	}
+  	fclose (fp);
+  }
+  if (cid[0] && type[0]) sprintf (tokenbuf, "%s:%s", type, cid);
+  else sprintf (tokenbuf, "hw:0");
+  if (!strcmp (tokenbuf, xfce_mixer_get_card_id (card))) return 1;
+  return 0;
+}
+
+

@@ -46,6 +46,8 @@ static void     xfce_mixer_window_soundcard_changed      (XfceMixerCardCombo   *
                                                           XfceMixerWindow      *window);
 static void     xfce_mixer_window_action_select_controls (GtkAction            *action,
                                                           XfceMixerWindow      *window);
+static void     xfce_mixer_window_action_use_card 		(GtkAction            *action,
+                                                          XfceMixerWindow      *window);
 static void     xfce_mixer_window_close                  (GtkAction            *action,
                                                           XfceMixerWindow      *window);
 static gboolean xfce_mixer_window_closed                 (GtkWidget            *window,
@@ -75,6 +77,7 @@ struct _XfceMixerWindow
   GtkWidget            *mixer;
 
   GtkWidget            *select_controls_button;
+  GtkWidget            *use_card_button;
 };
 
 
@@ -83,6 +86,8 @@ static const GtkActionEntry action_entries[] =
 {
   { "quit", GTK_STOCK_QUIT, N_ ("_Quit"), "<Control>q", N_ ("Exit the mixer"), 
     G_CALLBACK (xfce_mixer_window_close) },
+  { "use-card", NULL, N_ ("Make _Default"), "<Control>d", N_ ("Make this card the default output"), 
+    G_CALLBACK (xfce_mixer_window_action_use_card) },
   { "select-controls", NULL, N_ ("_Select Controls..."), "<Control>s", N_ ("Select which controls are displayed"), 
     G_CALLBACK (xfce_mixer_window_action_select_controls) },
 };
@@ -226,6 +231,14 @@ xfce_mixer_window_init (XfceMixerWindow *window)
   gtk_widget_set_sensitive (window->select_controls_button, FALSE);
   gtk_box_pack_start (GTK_BOX (bbox), window->select_controls_button, FALSE, TRUE, 0);
   gtk_widget_show (window->select_controls_button);
+  
+  window->use_card_button = gtk_button_new ();
+  gtk_action_connect_proxy (gtk_action_group_get_action (window->action_group, "use-card"), 
+                            window->use_card_button);
+  gtk_widget_set_sensitive (window->use_card_button, FALSE);
+  gtk_box_pack_start (GTK_BOX (bbox), window->use_card_button, FALSE, TRUE, 0);
+  gtk_widget_show (window->use_card_button);
+
 
   button = gtk_button_new ();
   gtk_action_connect_proxy (gtk_action_group_get_action (window->action_group, "quit"), button);
@@ -235,7 +248,7 @@ xfce_mixer_window_init (XfceMixerWindow *window)
 
   /* Re-generate mixer controls for the active sound card */
   xfce_mixer_window_update_contents (window);
-
+  
   g_free (active_card);
 }
 
@@ -302,6 +315,9 @@ xfce_mixer_window_soundcard_changed (XfceMixerCardCombo *combo,
   /* Make the "Select Controls..." button sensitive */
   gtk_widget_set_sensitive (window->select_controls_button, TRUE);
 
+  /* Make the "Make Default..." button sensitive */
+  gtk_widget_set_sensitive (window->use_card_button, TRUE);
+
   /* Remember the card for next time */
   g_object_set (G_OBJECT (window->preferences), "sound-card", xfce_mixer_get_card_internal_name (card), NULL);
 }
@@ -322,6 +338,20 @@ xfce_mixer_window_action_select_controls (GtkAction       *action,
   xfce_mixer_window_update_contents (window);
 }
 
+
+static void
+xfce_mixer_window_action_use_card (GtkAction       *action,
+                                          XfceMixerWindow *window)
+{
+  GstElement *card = xfce_mixer_card_combo_get_active_card (XFCE_MIXER_CARD_COMBO (window->soundcard_combo));
+  gchar *id =  xfce_mixer_get_card_id (card);
+  
+  xfce_mixer_set_default_card (id);
+  
+  xfce_mixer_window_update_contents (window);
+  
+  xfce_mixer_card_combo_update (XFCE_MIXER_CARD_COMBO (window->soundcard_combo), card);
+}
 
 static void
 xfce_mixer_window_close (GtkAction       *action,

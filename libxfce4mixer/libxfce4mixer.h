@@ -39,6 +39,7 @@ GList         *xfce_mixer_get_cards              (void);
 GstElement    *xfce_mixer_get_card               (const gchar   *name);
 const gchar   *xfce_mixer_get_card_internal_name (GstElement    *card);
 const gchar   *xfce_mixer_get_card_display_name  (GstElement    *card);
+const gchar   *xfce_mixer_get_card_id  (GstElement    *card);
 void           xfce_mixer_select_card            (GstElement    *card);
 GstMixerTrack *xfce_mixer_get_track              (GstElement    *card,
                                                   const gchar   *track_name);
@@ -51,6 +52,10 @@ void           xfce_mixer_bus_disconnect         (guint          signal_handler_
 
 gint           xfce_mixer_get_max_volume         (gint          *volumes,
                                                   gint           num_channels);
+                                                  
+void 			xfce_mixer_set_default_card 	(char *id);
+guint 			xfce_mixer_is_default_card 		(GstElement    *card);
+
 
 G_END_DECLS;
 
