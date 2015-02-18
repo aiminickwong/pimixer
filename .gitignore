@@ -1,0 +1,14 @@
+*.o
+*.so
+*.la
+*.a
+*.gmo
+*.lo
+.dirstamp
+.DS_Store
+lxpanel
+lxpanelctl
+config.log
+.deps/
+.libs/
+
