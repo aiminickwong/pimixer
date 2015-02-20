@@ -166,6 +166,13 @@ xfce_mixer_window_init (XfceMixerWindow *window)
 
   g_object_get (window->preferences, "window-width", &width, "window-height", &height, "sound-card", &active_card, NULL);
 
+  GList           *iter;
+  for (iter = xfce_mixer_get_cards (); iter != NULL; iter = g_list_next (iter))
+  {
+	if (xfce_mixer_is_default_card (iter->data)) 
+		active_card = xfce_mixer_get_card_internal_name (iter->data);
+  }
+
   /* Configure the main window */
   gtk_window_set_icon_name (GTK_WINDOW (window), "multimedia-volume-control");
   gtk_window_set_title (GTK_WINDOW (window), _("Mixer"));
