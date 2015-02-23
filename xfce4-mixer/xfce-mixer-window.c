@@ -256,7 +256,7 @@ xfce_mixer_window_init (XfceMixerWindow *window)
   /* Re-generate mixer controls for the active sound card */
   xfce_mixer_window_update_contents (window);
   
-  g_free (active_card);
+  //g_free (active_card);
 }
 
 
