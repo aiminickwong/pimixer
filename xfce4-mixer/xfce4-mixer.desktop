@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=1.0
-Name=Mixer
+Name=Audio Device Settings
 Name[ar]=مازج
 Name[ast]=Entemecedor
 Name[ca]=Mesclador
@@ -32,7 +32,7 @@ Name[uk]=Регулювання гучності
 Name[ur]=مکسر
 Name[ur_PK]=مکسر
 Name[zh_CN]=混音器
-Comment=Audio mixer for the Xfce Desktop Environment
+Comment=Settings for internal and external audio devices
 Comment[ast]=Entemecedor d'audio pal entornu d'escritoriu Xfce
 Comment[ca]=Mesclador d'àudio per l'entorn d'escriptori Xfce
 Comment[cs]=Směšovač zvuku pro pracovní prostředí Xfce
@@ -68,4 +68,4 @@ Exec=xfce4-mixer
 Type=Application
 StartupNotify=true
 Terminal=false
-Categories=X-XFCE;Audio;Mixer;AudioVideo;
+Categories=Settings
