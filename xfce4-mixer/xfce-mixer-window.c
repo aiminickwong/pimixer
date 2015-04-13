@@ -9,12 +9,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
 
@@ -46,7 +46,7 @@ static void     xfce_mixer_window_soundcard_changed      (XfceMixerCardCombo   *
                                                           XfceMixerWindow      *window);
 static void     xfce_mixer_window_action_select_controls (GtkAction            *action,
                                                           XfceMixerWindow      *window);
-static void     xfce_mixer_window_action_use_card 		(GtkAction            *action,
+static void     xfce_mixer_window_action_use_card        (GtkAction            *action,
                                                           XfceMixerWindow      *window);
 static void     xfce_mixer_window_close                  (GtkAction            *action,
                                                           XfceMixerWindow      *window);
@@ -82,13 +82,13 @@ struct _XfceMixerWindow
 
 
 
-static const GtkActionEntry action_entries[] = 
+static const GtkActionEntry action_entries[] =
 {
-  { "quit", GTK_STOCK_QUIT, N_ ("_Quit"), "<Control>q", N_ ("Exit the mixer"), 
+  { "quit", GTK_STOCK_QUIT, N_ ("_Quit"), "<Control>q", N_ ("Exit the mixer"),
     G_CALLBACK (xfce_mixer_window_close) },
-  { "use-card", NULL, N_ ("Make _Default"), "<Control>d", N_ ("Make this card the default output"), 
+  { "use-card", NULL, N_ ("Make _Default"), "<Control>d", N_ ("Make this card the default output"),
     G_CALLBACK (xfce_mixer_window_action_use_card) },
-  { "select-controls", NULL, N_ ("_Select Controls..."), "<Control>s", N_ ("Select which controls are displayed"), 
+  { "select-controls", NULL, N_ ("_Select Controls..."), "<Control>s", N_ ("Select which controls are displayed"),
     G_CALLBACK (xfce_mixer_window_action_select_controls) },
 };
 
@@ -109,7 +109,7 @@ xfce_mixer_window_get_type (void)
 
   if (G_UNLIKELY (type == G_TYPE_INVALID))
     {
-      static const GTypeInfo info = 
+      static const GTypeInfo info =
         {
           sizeof (XfceMixerWindowClass),
           NULL,
@@ -126,7 +126,7 @@ xfce_mixer_window_get_type (void)
       type = g_type_register_static (gtk_dialog_get_type (), "XfceMixerWindow", &info, 0);
 
     }
-  
+
   return type;
 }
 
@@ -169,8 +169,8 @@ xfce_mixer_window_init (XfceMixerWindow *window)
   GList           *iter;
   for (iter = xfce_mixer_get_cards (); iter != NULL; iter = g_list_next (iter))
   {
-	if (xfce_mixer_is_default_card (iter->data)) 
-		active_card = xfce_mixer_get_card_internal_name (iter->data);
+    if (xfce_mixer_is_default_card (iter->data))
+        active_card = xfce_mixer_get_card_internal_name (iter->data);
   }
 
   /* Configure the main window */
@@ -231,16 +231,16 @@ xfce_mixer_window_init (XfceMixerWindow *window)
   gtk_container_set_border_width (GTK_CONTAINER (bbox), 6);
 
   window->select_controls_button = gtk_button_new ();
-  gtk_action_connect_proxy (gtk_action_group_get_action (window->action_group, "select-controls"), 
+  gtk_action_connect_proxy (gtk_action_group_get_action (window->action_group, "select-controls"),
                             window->select_controls_button);
-  gtk_button_set_image (GTK_BUTTON (window->select_controls_button), 
+  gtk_button_set_image (GTK_BUTTON (window->select_controls_button),
                         gtk_image_new_from_icon_name ("preferences-desktop", GTK_ICON_SIZE_BUTTON));
   gtk_widget_set_sensitive (window->select_controls_button, FALSE);
   gtk_box_pack_start (GTK_BOX (bbox), window->select_controls_button, FALSE, TRUE, 0);
   gtk_widget_show (window->select_controls_button);
-  
+
   window->use_card_button = gtk_button_new ();
-  gtk_action_connect_proxy (gtk_action_group_get_action (window->action_group, "use-card"), 
+  gtk_action_connect_proxy (gtk_action_group_get_action (window->action_group, "use-card"),
                             window->use_card_button);
   gtk_widget_set_sensitive (window->use_card_button, FALSE);
   gtk_box_pack_start (GTK_BOX (bbox), window->use_card_button, FALSE, TRUE, 0);
@@ -255,7 +255,7 @@ xfce_mixer_window_init (XfceMixerWindow *window)
 
   /* Re-generate mixer controls for the active sound card */
   xfce_mixer_window_update_contents (window);
-  
+
   //g_free (active_card);
 }
 
@@ -352,13 +352,13 @@ xfce_mixer_window_action_use_card (GtkAction       *action,
 {
   GstElement *card = xfce_mixer_card_combo_get_active_card (XFCE_MIXER_CARD_COMBO (window->soundcard_combo));
   gchar *id =  xfce_mixer_get_card_id (card);
-  
+
   xfce_mixer_set_default_card (id);
-  
+
   xfce_mixer_window_update_contents (window);
-  
+
   xfce_mixer_card_combo_update (XFCE_MIXER_CARD_COMBO (window->soundcard_combo), card);
-  
+
   system ("lxpanelctl alsaconf");
 }
 
@@ -374,7 +374,7 @@ xfce_mixer_window_close (GtkAction       *action,
 
 
 
-static gboolean 
+static gboolean
 xfce_mixer_window_closed (GtkWidget       *window,
                           GdkEvent        *event,
                           XfceMixerWindow *mixer_window)

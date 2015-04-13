@@ -9,12 +9,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
 
@@ -82,7 +82,7 @@ xfce_mixer_controls_dialog_get_type (void)
 
   if (G_UNLIKELY (type == G_TYPE_INVALID))
     {
-      static const GTypeInfo info = 
+      static const GTypeInfo info =
         {
           sizeof (XfceMixerControlsDialogClass),
           NULL,
@@ -98,7 +98,7 @@ xfce_mixer_controls_dialog_get_type (void)
 
       type = g_type_register_static (gtk_dialog_get_type (), "XfceMixerControlsDialog", &info, 0);
     }
-  
+
   return type;
 }
 
@@ -192,7 +192,7 @@ xfce_mixer_controls_dialog_response (GtkDialog *dialog,
   gchar                  **controls;
   guint                    i;
 
-  gtk_tree_model_foreach (GTK_TREE_MODEL (mixer_dialog->store), 
+  gtk_tree_model_foreach (GTK_TREE_MODEL (mixer_dialog->store),
                           (GtkTreeModelForeachFunc) xfce_mixer_controls_dialog_collect_visible_controls,
                           &visible_controls);
 
@@ -287,8 +287,8 @@ xfce_mixer_controls_dialog_create_contents (XfceMixerControlsDialog *dialog)
 
   if (G_LIKELY (card != NULL))
     {
-      for (iter = gst_mixer_list_tracks (GST_MIXER (dialog->card)); 
-           iter != NULL; 
+      for (iter = gst_mixer_list_tracks (GST_MIXER (dialog->card));
+           iter != NULL;
            iter = g_list_next (iter))
         {
           visible = xfce_mixer_preferences_get_control_visible (preferences, dialog->card, iter->data);
@@ -296,9 +296,9 @@ xfce_mixer_controls_dialog_create_contents (XfceMixerControlsDialog *dialog)
           g_object_get (GST_MIXER_TRACK (iter->data), "label", &label, NULL, NULL);
 
           gtk_list_store_append (dialog->store, &tree_iter);
-          gtk_list_store_set (dialog->store, &tree_iter, 
-                              VISIBLE_COLUMN, visible, 
-                              NAME_COLUMN, label, 
+          gtk_list_store_set (dialog->store, &tree_iter,
+                              VISIBLE_COLUMN, visible,
+                              NAME_COLUMN, label,
                               -1);
 
           g_free (label);

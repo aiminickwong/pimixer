@@ -9,12 +9,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
 
@@ -132,9 +132,9 @@ xfce_mixer_get_card_display_name (GstElement *card)
 {
   g_return_val_if_fail (GST_IS_MIXER (card), NULL);
   if (xfce_mixer_is_default_card (card))
-  	return g_strconcat (g_object_get_data (G_OBJECT (card), "xfce-mixer-name"), " (Default)", NULL);
+    return g_strconcat (g_object_get_data (G_OBJECT (card), "xfce-mixer-name"), " (Default)", NULL);
   else
-  	return g_object_get_data (G_OBJECT (card), "xfce-mixer-name");
+    return g_object_get_data (G_OBJECT (card), "xfce-mixer-name");
 }
 
 
@@ -190,7 +190,7 @@ xfce_mixer_get_track (GstElement  *card,
           g_free (label);
           break;
         }
-      
+
       g_free (label);
     }
 
@@ -238,7 +238,7 @@ xfce_mixer_get_max_volume (gint *volumes,
 
 
 
-static gboolean 
+static gboolean
 _xfce_mixer_filter_mixer (GstMixer *mixer,
                           gpointer  user_data)
 {
@@ -259,10 +259,10 @@ _xfce_mixer_filter_mixer (GstMixer *mixer,
   /* Get the device name of the mixer element */
   if (g_object_class_find_property (G_OBJECT_GET_CLASS (G_OBJECT (mixer)), "device-name"))
     g_object_get (mixer, "device-name", &device_name, NULL);
-  
+
   if (g_object_class_find_property (G_OBJECT_GET_CLASS (G_OBJECT (mixer)), "device"))
     g_object_get (mixer, "device", &device, NULL);
-      
+
   /* Fall back to default name if neccessary */
   if (G_UNLIKELY (device_name == NULL))
     device_name = g_strdup_printf (_("Unknown Volume Control %d"), (*counter)++);
@@ -316,77 +316,77 @@ void xfce_mixer_set_default_card (char *id)
   strcpy (idbuf, id);
   card = strchr (idbuf, ':') + 1;
   *(strchr (idbuf, ':')) = 0;
- 
+
   FILE *fp = fopen (user_config_file, "rb");
   if (!fp)
   {
-  	// File does not exist - create it from scratch
-  	fp = fopen (user_config_file, "wb");
-  	fprintf (fp, "pcm.!default {\n\ttype %s\n\tcard %s\n}\n\nctl.!default {\n\ttype %s\n\tcard %s\n}\n", idbuf, card, idbuf, card);
-  	fclose (fp);
+    // File does not exist - create it from scratch
+    fp = fopen (user_config_file, "wb");
+    fprintf (fp, "pcm.!default {\n\ttype %s\n\tcard %s\n}\n\nctl.!default {\n\ttype %s\n\tcard %s\n}\n", idbuf, card, idbuf, card);
+    fclose (fp);
   }
   else
   {
-	// File exists - check to see whether it contains a default card
-	type[0] = 0;
-  	cid[0] = 0;
-  	count = 0;
-  	while ((inchar = fgetc (fp)) != EOF)
-  	{
-  		if (inchar == ' ' || inchar == '\t' || inchar == '\n' || inchar == '\r')
-  		{
-  			if (bufptr != cmdbuf)
-  			{
-  				*bufptr = 0;
-  				switch (state)
-  				{
-  					case 1 :	strcpy (type, cmdbuf);
-  						  		state = 0;
-  						  		break;
-   					case 2 :  	strcpy (cid, cmdbuf);
-  						  		state = 0;
-  						  		break;
-  					default : 	if (!strcmp (cmdbuf, "type") && indef) state = 1;
-  						  		else if (!strcmp (cmdbuf, "card") && indef) state = 2;
-  						  		else if (!strcmp (cmdbuf, "pcm.!default")) indef = 1;
-  						  		else if (!strcmp (cmdbuf, "}")) indef = 0;
-  						  		break;
-  				}
-  				bufptr = cmdbuf;
-  				count = 0;
-  				if (cid[0] && type[0]) break;
-  			}
-  			else
-  			{
-  				bufptr = cmdbuf;
-  				count = 0;
-  			}
-  		}
-  		else
-  		{
-  			if (count < 255)
-  			{ 
-  				*bufptr++ = inchar;
-  				count++;
-  			}
-  			else cmdbuf[255] = 0;
-  		}
-  	}
-  	fclose (fp);
-  	if (cid[0] && type[0]) 
-  	{
-  		// This piece of sed is surely self-explanatory...
-  		sprintf (cmdbuf, "sed -i '/pcm.!default\\|ctl.!default/,/}/ { s/type .*/type %s/g; s/card .*/card %s/g; }' %s", idbuf, card, user_config_file);
-  		system (cmdbuf);
-  		// Oh, OK then - it looks for type * and card * within the delimiters pcm.!default or ctl.!default and } and replaces the parameters
-  	}
-  	else
-  	{
-  		// No default card; append to end of file
-  		fp = fopen (user_config_file, "ab");
-  		fprintf (fp, "\n\npcm.!default {\n\ttype %s\n\tcard %s\n}\n\nctl.!default {\n\ttype %s\n\tcard %s\n}\n", idbuf, card, idbuf, card);
-  		fclose (fp);
-  	}
+  // File exists - check to see whether it contains a default card
+  type[0] = 0;
+    cid[0] = 0;
+    count = 0;
+    while ((inchar = fgetc (fp)) != EOF)
+    {
+      if (inchar == ' ' || inchar == '\t' || inchar == '\n' || inchar == '\r')
+      {
+        if (bufptr != cmdbuf)
+        {
+          *bufptr = 0;
+          switch (state)
+          {
+            case 1 :  strcpy (type, cmdbuf);
+                      state = 0;
+                      break;
+            case 2 :  strcpy (cid, cmdbuf);
+                      state = 0;
+                      break;
+            default : if (!strcmp (cmdbuf, "type") && indef) state = 1;
+                      else if (!strcmp (cmdbuf, "card") && indef) state = 2;
+                      else if (!strcmp (cmdbuf, "pcm.!default")) indef = 1;
+                      else if (!strcmp (cmdbuf, "}")) indef = 0;
+                      break;
+          }
+          bufptr = cmdbuf;
+          count = 0;
+          if (cid[0] && type[0]) break;
+        }
+        else
+        {
+          bufptr = cmdbuf;
+          count = 0;
+        }
+      }
+      else
+      {
+        if (count < 255)
+        {
+          *bufptr++ = inchar;
+          count++;
+        }
+        else cmdbuf[255] = 0;
+      }
+    }
+    fclose (fp);
+    if (cid[0] && type[0])
+    {
+      // This piece of sed is surely self-explanatory...
+      sprintf (cmdbuf, "sed -i '/pcm.!default\\|ctl.!default/,/}/ { s/type .*/type %s/g; s/card .*/card %s/g; }' %s", idbuf, card, user_config_file);
+      system (cmdbuf);
+      // Oh, OK then - it looks for type * and card * within the delimiters pcm.!default or ctl.!default and } and replaces the parameters
+    }
+    else
+    {
+      // No default card; append to end of file
+      fp = fopen (user_config_file, "ab");
+      fprintf (fp, "\n\npcm.!default {\n\ttype %s\n\tcard %s\n}\n\nctl.!default {\n\ttype %s\n\tcard %s\n}\n", idbuf, card, idbuf, card);
+      fclose (fp);
+    }
   }
   g_free (user_config_file);
 }
@@ -396,7 +396,7 @@ guint
 xfce_mixer_is_default_card (GstElement *card)
 {
   g_return_val_if_fail (GST_IS_MIXER (card), 0);
-  
+
   char tokenbuf[256], type[16], cid[16], state = 0, indef = 0;
   char *bufptr = tokenbuf;
   int inchar, count;
@@ -404,51 +404,51 @@ xfce_mixer_is_default_card (GstElement *card)
   FILE *fp = fopen (user_config_file, "rb");
   if (fp)
   {
-  	type[0] = 0;
-  	cid[0] = 0;
-  	count = 0;
-  	while ((inchar = fgetc (fp)) != EOF)
-  	{
-  		if (inchar == ' ' || inchar == '\t' || inchar == '\n' || inchar == '\r')
-  		{
-  			if (bufptr != tokenbuf)
-  			{
-  				*bufptr = 0;
-  				switch (state)
-  				{
-  					case 1 :	strcpy (type, tokenbuf);
-  						  		state = 0;
-  						  		break;
-   					case 2 :  	strcpy (cid, tokenbuf);
-  						  		state = 0;
-  						  		break;
-  					default : 	if (!strcmp (tokenbuf, "type") && indef) state = 1;
-  						  		else if (!strcmp (tokenbuf, "card") && indef) state = 2;
-  						  		else if (!strcmp (tokenbuf, "pcm.!default")) indef = 1;
-  						  		else if (!strcmp (tokenbuf, "}")) indef = 0;
-  						  		break;
-  				}
-  				bufptr = tokenbuf;
-  				count = 0;
-  				if (cid[0] && type[0]) break;
-  			}
-  			else 
-  			{
-  				bufptr = tokenbuf;
-  				count = 0;
-  			}
-  		}
-  		else 
-  		{
-  			if (count < 255)
-  			{ 
-  				*bufptr++ = inchar;
-  				count++;
-  			}
-  			else tokenbuf[255] = 0;
-  		}
-  	}
-  	fclose (fp);
+    type[0] = 0;
+    cid[0] = 0;
+    count = 0;
+    while ((inchar = fgetc (fp)) != EOF)
+    {
+      if (inchar == ' ' || inchar == '\t' || inchar == '\n' || inchar == '\r')
+      {
+        if (bufptr != tokenbuf)
+        {
+          *bufptr = 0;
+          switch (state)
+          {
+            case 1 :  strcpy (type, tokenbuf);
+                    state = 0;
+                    break;
+            case 2 :    strcpy (cid, tokenbuf);
+                    state = 0;
+                    break;
+            default :   if (!strcmp (tokenbuf, "type") && indef) state = 1;
+                    else if (!strcmp (tokenbuf, "card") && indef) state = 2;
+                    else if (!strcmp (tokenbuf, "pcm.!default")) indef = 1;
+                    else if (!strcmp (tokenbuf, "}")) indef = 0;
+                    break;
+          }
+          bufptr = tokenbuf;
+          count = 0;
+          if (cid[0] && type[0]) break;
+        }
+        else
+        {
+          bufptr = tokenbuf;
+          count = 0;
+        }
+      }
+      else
+      {
+        if (count < 255)
+        {
+          *bufptr++ = inchar;
+          count++;
+        }
+        else tokenbuf[255] = 0;
+      }
+    }
+    fclose (fp);
   }
   if (cid[0] && type[0]) sprintf (tokenbuf, "%s:%s", type, cid);
   else sprintf (tokenbuf, "hw:0");

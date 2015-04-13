@@ -9,12 +9,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
 
@@ -52,9 +52,9 @@ void           xfce_mixer_bus_disconnect         (guint          signal_handler_
 
 gint           xfce_mixer_get_max_volume         (gint          *volumes,
                                                   gint           num_channels);
-                                                  
-void 			xfce_mixer_set_default_card 	(char *id);
-guint 			xfce_mixer_is_default_card 		(GstElement    *card);
+
+void           xfce_mixer_set_default_card       (char *id);
+guint          xfce_mixer_is_default_card        (GstElement    *card);
 
 
 G_END_DECLS;
