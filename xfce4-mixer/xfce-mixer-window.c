@@ -412,3 +412,17 @@ xfce_mixer_window_update_contents (XfceMixerWindow *window)
   if (G_LIKELY (GST_IS_MIXER (card)))
     xfce_mixer_window_soundcard_changed (XFCE_MIXER_CARD_COMBO (window->soundcard_combo), card, window);
 }
+
+void volumealsa_device_changed (GDBusConnection *connection, const gchar *name, const gchar *name_owner, gpointer user_data)
+{
+  XfceMixerWindow *window = (XfceMixerWindow *) user_data;
+  GList *iter;
+  gchar *active_card;
+
+  for (iter = xfce_mixer_get_cards (); iter != NULL; iter = g_list_next (iter))
+  {
+    if (xfce_mixer_is_default_card (iter->data)) break;
+  }
+  xfce_mixer_window_soundcard_changed (XFCE_MIXER_CARD_COMBO (window->soundcard_combo), iter->data, window);
+  xfce_mixer_card_combo_update (XFCE_MIXER_CARD_COMBO (window->soundcard_combo), iter->data);
+}

@@ -36,7 +36,7 @@
 
 #include "xfce-mixer-window.h"
 
-
+void volumealsa_device_changed (GDBusConnection *connection, const gchar *name, const gchar *name_owner, gpointer user_data);
 
 int 
 main (int    argc,
@@ -101,6 +101,8 @@ main (int    argc,
 
   /* Display the mixer window */
   gtk_widget_show (window);
+
+  g_bus_watch_name (G_BUS_TYPE_SESSION, "org.lxde.volumealsa", 0, volumealsa_device_changed, NULL, window, NULL);
 
   /* Enter the GTK+ main loop */
   gtk_main ();
