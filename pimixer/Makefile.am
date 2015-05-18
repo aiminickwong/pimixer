@@ -2,9 +2,9 @@
 # vi:set ts=8 sw=8 noet ai nocindent syntax=automake:
 
 bin_PROGRAMS =								\
-	xfce4-mixer
+	pimixer
 
-xfce4_mixer_SOURCES =							\
+pimixer_SOURCES =							\
 	main.c								\
 	xfce-mixer-track.c						\
 	xfce-mixer-track.h						\
@@ -19,7 +19,7 @@ xfce4_mixer_SOURCES =							\
 	xfce-mixer-window.h						\
 	xfce-mixer-window.c
 
-xfce4_mixer_CFLAGS = 							\
+pimixer_CFLAGS = 							\
 	-I$(top_builddir)						\
 	-I$(top_srcdir)							\
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"				\
@@ -32,10 +32,10 @@ xfce4_mixer_CFLAGS = 							\
 	$(XFCONF_CFLAGS)						\
 	$(GST_PLUGINS_BASE_CFLAGS)
 
-xfce4_mixer_DEPENDENCIES = 						\
+pimixer_DEPENDENCIES = 						\
 	$(top_builddir)/libxfce4mixer/libxfce4mixer.la
 	
-xfce4_mixer_LDFLAGS = 							\
+pimixer_LDFLAGS = 							\
 	$(top_builddir)/libxfce4mixer/libxfce4mixer.la			\
 	$(GLIB_LIBS)							\
 	$(GTHREAD_LIBS)							\
@@ -54,7 +54,7 @@ xfce4_mixer_LDFLAGS = 							\
 # We also need to let intltool merge the translated fields, so we add an
 # additional level of indirection: a <name>.desktop.in.in file.
 # 
-desktop_in_in_files = xfce4-mixer.desktop.in.in
+desktop_in_in_files = pimixer.desktop.in.in
 desktop_in_files = $(desktop_in_in_files:.desktop.in.in=.desktop.in)
 desktopdir = $(datadir)/applications
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)

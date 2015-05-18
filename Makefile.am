@@ -23,7 +23,7 @@ SUBDIRS =								\
 	icons								\
 	pixmaps								\
 	libxfce4mixer							\
-	xfce4-mixer							\
+	pimixer							\
 	po
 
 AUTOMAKE_OPTIONS =							\
