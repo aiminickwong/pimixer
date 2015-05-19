@@ -3,7 +3,7 @@ panel-plugin/xfce-plugin-dialog.c
 panel-plugin/xfce-volume-button.c
 panel-plugin/xfce-plugin-dialog.h
 panel-plugin/xfce-volume-button.h
-panel-plugin/xfce4-mixer-plugin.desktop.in.in
+panel-plugin/pimixer.desktop.in.in
 libxfce4mixer/libxfce4mixer.c
 libxfce4mixer/xfce-mixer-card-combo.c
 libxfce4mixer/xfce-mixer-preferences.c
