@@ -1,10 +1,13 @@
-xfce4-mixer Information
+pimixer Information
 =======================
 
-This package contains a volume control application based on GStreamer
-0.10 written to conceptually fit into the Xfce desktop environment. It
-also contains a plugin for the Xfce panel which is especially designed
-for use with the mouse wheel.
+This package contains a modified version of the xfce4-mixer volume control 
+application based on GStreamer 0.10 originally written to conceptually fit 
+into the Xfce desktop environment. It also contains a plugin for the Xfce 
+panel which is especially designed for use with the mouse wheel.
+
+The application has been modified for use with Raspberry Pi by removing the Xfce
+look and feel and adding a control to select the default audio output on Pi.
 
 Known Problems with GStreamer
 -----------------------------
