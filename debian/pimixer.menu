@@ -1,0 +1,6 @@
+?package(pimixer):\
+ needs="X11"\
+ section="Applications/Sound"\
+ title="PiMixer"\
+ command="/usr/bin/pimixer"\
+ icon="/usr/share/pixmaps/pimixer.xpm"
