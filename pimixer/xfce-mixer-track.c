@@ -242,7 +242,7 @@ xfce_mixer_track_create_contents (XfceMixerTrack *track)
   if (G_LIKELY (track->gst_track->num_channels >= 2))
     {
       track->lock_button = gtk_toggle_button_new ();
-      image = gtk_image_new_from_file (DATADIR "/pixmaps/xfce4-mixer/chain.png");
+      image = gtk_image_new_from_file (DATADIR "/pixmaps/pimixer/chain.png");
       gtk_button_set_image (GTK_BUTTON (track->lock_button), image);
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (track->lock_button), TRUE);
       g_signal_connect (track->lock_button, "toggled", G_CALLBACK (xfce_mixer_track_lock_toggled), track);
@@ -356,12 +356,12 @@ xfce_mixer_track_lock_toggled (GtkToggleButton *button,
   /* Do nothing if the channels were unlocked */
   if (G_UNLIKELY (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (track->lock_button))))
     {
-      image = gtk_image_new_from_file (DATADIR "/pixmaps/xfce4-mixer/chain-broken.png");
+      image = gtk_image_new_from_file (DATADIR "/pixmaps/pimixer/chain-broken.png");
       gtk_button_set_image (GTK_BUTTON (track->lock_button), image);
       return;
     }
 
-  image = gtk_image_new_from_file (DATADIR "/pixmaps/xfce4-mixer/chain.png");
+  image = gtk_image_new_from_file (DATADIR "/pixmaps/pimixer/chain.png");
   gtk_button_set_image (GTK_BUTTON (track->lock_button), image);
 
   /* Allocate array for volumes of all channels */

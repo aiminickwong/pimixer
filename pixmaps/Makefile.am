@@ -1,6 +1,6 @@
 # $Id$
 
-pixmapsdir = $(datadir)/pixmaps/xfce4-mixer
+pixmapsdir = $(datadir)/pixmaps/pimixer
 pixmaps_DATA =								\
 	chain-broken.png						\
 	chain.png
