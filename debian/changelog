@@ -1,3 +1,9 @@
+pimixer (0.20150519~144516-2) stable; urgency=low
+
+  * Jessie rebuild
+
+ -- Serge Schneider <serge@raspberrypi.org>  Tue, 26 May 2015 16:30:13 +0100
+
 pimixer (0.20150519~144516-1) stable; urgency=low
 
   * Rename package to pimixer
