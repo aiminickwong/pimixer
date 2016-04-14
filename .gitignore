@@ -6,9 +6,12 @@
 *.lo
 .dirstamp
 .DS_Store
-lxpanel
-lxpanelctl
+pimixer
+xfce4-mixer-plugin
+Makefile
+config.status
 config.log
+libtool
 .deps/
 .libs/
-
+autom4te.cache/*
