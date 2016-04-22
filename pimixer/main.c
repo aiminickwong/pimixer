@@ -86,15 +86,18 @@ main (int    argc,
 
   /* Warn users if there were no sound cards detected by GStreamer */
   if (G_UNLIKELY (g_list_length (xfce_mixer_get_cards ()) <= 0))
-    {
-      xfce_dialog_show_error (NULL,
-                              NULL,
-                              _("GStreamer was unable to detect any sound devices. "
-                              "Some sound system specific GStreamer packages may "
-                              "be missing. It may also be a permissions problem."));
-
+  {
+      GtkWidget *dlg = gtk_dialog_new_with_buttons (_("No ALSA Devices Found"), NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, 0, NULL);
+      GtkWidget *label = gtk_label_new (_("No ALSA audio devices were detected. Enable the internal audio device, or connect a USB or HAT audio device."));
+      gtk_container_set_border_width (GTK_CONTAINER (dlg), 10);
+      gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
+      gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
+      gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+      gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dlg))), label, TRUE, TRUE, 0);
+      gtk_widget_show_all (dlg);
+      gtk_dialog_run (GTK_DIALOG (dlg));
       return EXIT_FAILURE;
-    }
+  }
 
   /* Create the mixer window */
   window = xfce_mixer_window_new ();
