@@ -1,3 +1,9 @@
+pimixer (0.20160422~163906-1) stable; urgency=medium
+
+  * Handle cases where there is no default ALSA device
+
+ -- Serge Schneider <serge@raspberrypi.org>  Mon, 25 Apr 2016 15:07:26 +0100
+
 pimixer (0.20150519~144516-2) stable; urgency=low
 
   * Jessie rebuild
