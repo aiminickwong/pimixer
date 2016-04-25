@@ -312,6 +312,9 @@ void xfce_mixer_set_default_card (char *id)
   int inchar, count;
   char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
 
+  // kill pulseaudio if it is running to disconnect Bluetooth devices
+  system ("pulseaudio --kill");
+
   // Break the id string into the type (before the colon) and the card number (after the colon)
   strcpy (idbuf, id);
   card = strchr (idbuf, ':') + 1;
@@ -400,8 +403,19 @@ xfce_mixer_is_default_card (GstElement *card)
   char tokenbuf[256], type[16], cid[16], state = 0, indef = 0;
   char *bufptr = tokenbuf;
   int inchar, count;
+
+  // if pulseaudio is running, no ALSA devices are default
+  FILE *fp = popen ("pulseaudio --check ; echo $?", "r");
+  if (fp && fgets (tokenbuf, sizeof (tokenbuf) - 1, fp))
+  {
+    inchar = -1;
+    sscanf (tokenbuf, "%d", &inchar);
+    if (inchar == 0) return 0;
+  }
+  if (fp) fclose (fp);
+
   char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
-  FILE *fp = fopen (user_config_file, "rb");
+  fp = fopen (user_config_file, "rb");
   if (fp)
   {
     type[0] = 0;
