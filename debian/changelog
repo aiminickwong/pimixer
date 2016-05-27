@@ -1,3 +1,9 @@
+pimixer (0.20160527~090638-1) jessie; urgency=medium
+
+  * pclose used instead of incorrect fclose
+
+ -- Serge Schneider <serge@raspberrypi.org>  Fri, 27 May 2016 11:39:47 +0100
+
 pimixer (0.20160422~163906-1) stable; urgency=medium
 
   * Handle cases where there is no default ALSA device
