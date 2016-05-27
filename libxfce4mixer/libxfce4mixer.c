@@ -412,7 +412,7 @@ xfce_mixer_is_default_card (GstElement *card)
     sscanf (tokenbuf, "%d", &inchar);
     if (inchar == 0) return 0;
   }
-  if (fp) fclose (fp);
+  if (fp) pclose (fp);
 
   char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
   fp = fopen (user_config_file, "rb");
