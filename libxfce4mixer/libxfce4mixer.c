@@ -46,7 +46,74 @@ static GstBus     *bus = NULL;
 static GstElement *selected_card = NULL;
 #endif
 
+// Functions to disconnect a Bluetooth device
 
+static int get_bt_device_id (char *id)
+{
+    char *user_config_file, *ptr, buffer[64];
+    FILE *fp;
+    int count;
+
+    user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
+    fp = fopen (user_config_file, "rb");
+    g_free (user_config_file);
+
+    if (!fp) return 0;
+
+    while (fgets (buffer, sizeof (buffer), fp))
+    {
+        ptr = strstr (buffer, "device");
+        if (ptr)
+        {
+            // find the opening quote
+            while (*ptr && *ptr != '"') ptr++;
+            if (*ptr == '"')
+            {
+                // there should be another quote at the end, 18 chars later
+                if (*(ptr + 18) == '"')
+                {
+                    // replace : with _
+                    for (count = 1; count < 6; count++) *(ptr + (count * 3)) = '_';
+
+                    // copy and terminate
+                    strncpy (id, ptr + 1, 17);
+                    id[17] = 0;
+
+                    fclose (fp);
+                    return 1;
+                }
+            }
+        }
+    }
+
+    fclose (fp);
+    return 0;
+}
+
+
+static void disconnect_device (void)
+{
+    GError *error = NULL;
+    char buffer[64], device[20];
+
+    if (get_bt_device_id (device))
+    {
+        sprintf (buffer, "/org/bluez/hci0/dev_%s", device);
+
+        // call the disconnect method on BlueZ
+		GError *error = NULL;
+		GDBusObjectManager *objmanager = g_dbus_object_manager_client_new_for_bus_sync (G_BUS_TYPE_SYSTEM, 0, "org.bluez", "/", NULL, NULL, NULL, NULL, &error);
+		if (objmanager)
+		{
+			GDBusInterface *interface = g_dbus_object_manager_get_interface (objmanager, buffer, "org.bluez.Device1");
+			if (interface)
+			{
+				g_dbus_proxy_call (G_DBUS_PROXY (interface), "Disconnect", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
+				g_object_unref (interface);
+			}
+        }
+    }
+}
 
 void
 xfce_mixer_init (void)
@@ -312,8 +379,7 @@ void xfce_mixer_set_default_card (char *id)
   int inchar, count;
   char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
 
-  // kill pulseaudio if it is running to disconnect Bluetooth devices
-  system ("pulseaudio --kill");
+  disconnect_device ();
 
   // Break the id string into the type (before the colon) and the card number (after the colon)
   strcpy (idbuf, id);
@@ -331,7 +397,7 @@ void xfce_mixer_set_default_card (char *id)
   else
   {
   // File exists - check to see whether it contains a default card
-  type[0] = 0;
+    type[0] = 0;
     cid[0] = 0;
     count = 0;
     while ((inchar = fgetc (fp)) != EOF)
@@ -383,6 +449,13 @@ void xfce_mixer_set_default_card (char *id)
       system (cmdbuf);
       // Oh, OK then - it looks for type * and card * within the delimiters pcm.!default or ctl.!default and } and replaces the parameters
     }
+    else if (type[0] && !strcmp (type, "bluealsa"))
+    {
+      // Was using Bluetooth - overwrite entire file
+      fp = fopen (user_config_file, "wb");
+      fprintf (fp, "\n\npcm.!default {\n\ttype %s\n\tcard %s\n}\n\nctl.!default {\n\ttype %s\n\tcard %s\n}\n", idbuf, card, idbuf, card);
+      fclose (fp);
+    }
     else
     {
       // No default card; append to end of file
@@ -404,18 +477,8 @@ xfce_mixer_is_default_card (GstElement *card)
   char *bufptr = tokenbuf;
   int inchar, count;
 
-  // if pulseaudio is running, no ALSA devices are default
-  FILE *fp = popen ("pulseaudio --check ; echo $?", "r");
-  if (fp && fgets (tokenbuf, sizeof (tokenbuf) - 1, fp))
-  {
-    inchar = -1;
-    sscanf (tokenbuf, "%d", &inchar);
-    if (inchar == 0) return 0;
-  }
-  if (fp) pclose (fp);
-
   char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
-  fp = fopen (user_config_file, "rb");
+  FILE *fp = fopen (user_config_file, "rb");
   if (fp)
   {
     type[0] = 0;
@@ -464,6 +527,7 @@ xfce_mixer_is_default_card (GstElement *card)
     }
     fclose (fp);
   }
+  if (type[0] && !strcmp (type, "bluealsa")) return 0;
   if (cid[0] && type[0]) sprintf (tokenbuf, "%s:%s", type, cid);
   else sprintf (tokenbuf, "hw:0");
   if (!strcmp (tokenbuf, xfce_mixer_get_card_id (card))) return 1;
