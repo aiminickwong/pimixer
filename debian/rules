@@ -6,11 +6,6 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=+pie,+bindnow
 %:
 	dh $@ --parallel --with autoreconf
 
-override_dh_autoreconf:
-	dh_autoreconf  xdt-autogen
-
 override_dh_auto_install:
 	dh_auto_install
 	install -d $(CURDIR)/debian/pimixer/usr/share/pixmaps
-	install -c -m 644 $(CURDIR)/debian/pimixer.xpm \
-		$(CURDIR)/debian/pimixer/usr/share/pixmaps

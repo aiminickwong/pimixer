@@ -27,8 +27,6 @@ pimixer_CFLAGS = 							\
 	-DMIXER_DATADIR=\"$(pkgdatadir)\"				\
 	$(GLIB_CFLAGS)							\
 	$(GTK_CFLAGS)							\
-	$(LIBXFCE4UTIL_CFLAGS)						\
-	$(LIBXFCE4UI_CFLAGS)						\
 	$(XFCONF_CFLAGS)						\
 	$(GST_PLUGINS_BASE_CFLAGS)
 
@@ -40,8 +38,6 @@ pimixer_LDFLAGS = 							\
 	$(GLIB_LIBS)							\
 	$(GTHREAD_LIBS)							\
 	$(GTK_LIBS)							\
-	$(LIBXFCE4UTIL_LIBS)						\
-	$(LIBXFCE4UI_LIBS)						\
 	$(XFCONF_LIBS)							\
 	$(GST_PLUGINS_BASE_LIBS)					\
 	-lgstaudio-0.10							\

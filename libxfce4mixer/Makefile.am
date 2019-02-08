@@ -26,9 +26,7 @@ libxfce4mixer_la_CFLAGS = 						\
 	-DMIXER_DATADIR=\"$(pkgdatadir)\"				\
 	$(PLATFORM_CFLAGS)						\
 	$(GLIB_CFLAGS)							\
-	$(GTK_FLAGS)							\
-	$(LIBXFCE4UTIL_CFLAGS)						\
-	$(LIBXFCE4UI_CFLAGS)						\
+	$(GTK_CFLAGS)							\
 	$(XFCONF_CFLAGS)						\
 	$(GST_PLUGINS_BASE_CFLAGS)
 
@@ -38,9 +36,7 @@ libxfce4mixer_la_LDFLAGS =						\
 libxfce4mixer_la_LIBADD =						\
 	$(PLATFORM_LDFLAGS)						\
 	$(GLIB_LIBS)							\
-	$(GTK_FLAGS)							\
-	$(LIBXFCE4UTIL_LIBS)						\
-	$(LIBXFCE4UI_LIBS)						\
+	$(GTK_LIBS)							\
 	$(XFCONF_LIBS)							\
 	$(GST_PLUGINS_BASE_LIBS)					\
 	-lgstaudio-0.10							\

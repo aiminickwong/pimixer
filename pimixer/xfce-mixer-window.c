@@ -22,12 +22,11 @@
 #include <config.h>
 #endif
 
+#include <glib/gi18n.h>
+
 #include <gst/gst.h>
 #include <gst/audio/mixerutils.h>
 #include <gst/interfaces/mixer.h>
-
-#include <libxfce4util/libxfce4util.h>
-#include <libxfce4ui/libxfce4ui.h>
 
 #include "libxfce4mixer/libxfce4mixer.h"
 
@@ -308,7 +307,7 @@ xfce_mixer_window_soundcard_changed (XfceMixerCardCombo *combo,
   if (G_LIKELY (window->mixer != NULL))
     gtk_widget_destroy (gtk_bin_get_child (GTK_BIN (window->mixer_frame)));
 
-  DBG ("card = %s", xfce_mixer_get_card_internal_name (card));
+  //DBG ("card = %s", xfce_mixer_get_card_internal_name (card));
 
   xfce_mixer_select_card (card);
 

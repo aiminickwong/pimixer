@@ -4,9 +4,8 @@ Priority: optional
 Maintainer: Serge Schneider <serge@raspberrypi.org>
 Build-Depends: debhelper (>= 9), pkg-config, libglib2.0-dev,
  libgstreamer-plugins-base0.10-dev, libgtk2.0-dev, 
- libxfce4util-dev (>= 4.8.0), libxfce4ui-1-dev (>= 4.8.0), 
  libxml-parser-perl, libxfconf-0-dev (>= 4.8.0), intltool, 
- dpkg-dev (>= 1.16.1), dh-autoreconf, xfce4-dev-tools
+ dpkg-dev (>= 1.16.1), dh-autoreconf
 Standards-Version: 3.9.3
 Homepage: http://raspberrypi.org
 Vcs-Svn: https://github.com/raspberrypi/pimixer.git

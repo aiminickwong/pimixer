@@ -23,11 +23,10 @@
 #endif
 
 #include <glib.h>
+#include <glib/gi18n.h>
 
 #include <gst/audio/mixerutils.h>
 #include <gst/interfaces/mixer.h>
-
-#include <libxfce4util/libxfce4util.h>
 
 #include "libxfce4mixer.h"
 

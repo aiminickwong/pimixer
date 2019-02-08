@@ -27,9 +27,8 @@
 #endif
 
 #include <gst/gst.h>
+#include <glib/gi18n.h>
 
-#include <libxfce4util/libxfce4util.h>
-#include <libxfce4ui/libxfce4ui.h>
 #include <xfconf/xfconf.h>
 
 #include "libxfce4mixer/libxfce4mixer.h"
@@ -46,7 +45,12 @@ main (int    argc,
   GError    *error = NULL;
 
   /* Setup translation domain */
-  xfce_textdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR, "UTF-8");
+#ifdef ENABLE_NLS
+    setlocale (LC_ALL, "");
+    bindtextdomain ( GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR );
+    bind_textdomain_codeset ( GETTEXT_PACKAGE, "UTF-8" );
+    textdomain ( GETTEXT_PACKAGE );
+#endif
 
   /* Initialize the threading system */
   if (G_LIKELY (!g_thread_supported ()))

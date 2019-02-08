@@ -83,18 +83,18 @@ AC_HEADER_STDC()
 dnl ******************************
 dnl *** Check for i18n support ***
 dnl ******************************
-XDT_I18N([am ar ast ca cs da de el en_GB es eu fi fr gl hu id it ja kk lv nb nl pl pt_BR pt ro ru si sk sv tr ug uk ur_PK ur zh_CN ])
+GETTEXT_PACKAGE=pimixer
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package.])
 
 dnl ***********************************
 dnl *** Check for required packages ***
 dnl ***********************************
-XDT_CHECK_PACKAGE([GLIB], [glib-2.0], [2.18.0])
-XDT_CHECK_PACKAGE([GTHREAD], [gthread-2.0], [2.18.0])
-XDT_CHECK_PACKAGE([GST_PLUGINS_BASE], [gstreamer-plugins-base-0.10], [0.10.2])
-XDT_CHECK_PACKAGE([GTK], [gtk+-2.0], [2.14.0])
-XDT_CHECK_PACKAGE([LIBXFCE4UTIL], [libxfce4util-1.0], [4.8.0])
-XDT_CHECK_PACKAGE([LIBXFCE4UI], [libxfce4ui-1], [4.8.0])
-XDT_CHECK_PACKAGE([XFCONF], [libxfconf-0], [4.8.0])
+PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.18.0)
+PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.18.0)
+PKG_CHECK_MODULES(GST_PLUGINS_BASE, gstreamer-plugins-base-0.10 >= 0.10.2)
+PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.14.0)
+PKG_CHECK_MODULES(XFCONF, libxfconf-0 >= 4.8.0)
 
 dnl **************************************
 dnl *** Check for GstMixer bus support ***
@@ -112,12 +112,10 @@ fi
 dnl ***********************************
 dnl *** Check for debugging support ***
 dnl ***********************************
-XDT_FEATURE_DEBUG(mixer_debug_default)
 
 dnl **************************************
 dnl *** Check for linker optimizations ***
 dnl **************************************
-XDT_FEATURE_LINKER_OPTS()
 
 dnl *********************************
 dnl *** Substitute platform flags ***
