@@ -87,6 +87,8 @@ GETTEXT_PACKAGE=pimixer
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package.])
 
+AM_GLIB_GNU_GETTEXT
+
 dnl ***********************************
 dnl *** Check for required packages ***
 dnl ***********************************
