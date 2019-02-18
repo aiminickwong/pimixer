@@ -1,3 +1,9 @@
+pimixer (0.20190218~130321) stretch; urgency=medium
+
+  * Remove build dependencies on libxfce
+
+ -- Simon Long <simon@raspberrypi.org>  Mon, 18 Feb 2019 13:03:21 +0000
+
 pimixer (0.20170803~152204) stretch; urgency=medium
 
   * Modified for compatibility with bluealsa Bluetooth support
