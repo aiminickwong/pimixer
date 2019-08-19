@@ -35,13 +35,35 @@
 
 #include "xfce-mixer-window.h"
 
-void volumealsa_device_changed (GDBusConnection *connection, const gchar *name, const gchar *name_owner, gpointer user_data);
+#include "single-inst.h"
+#include <gdk/gdkx.h>
+
+static char* ipc_cwd = NULL;
+static gboolean refresh = FALSE;
+static GtkWidget *window;
+
+static GOptionEntry opt_entries[] =
+{
+    { "refresh", '\0', 0, G_OPTION_ARG_NONE, &refresh, N_("Update default device"), NULL },
+    { NULL }
+};
+
+static void single_inst_cb(const char* cwd, int screen_num)
+{
+    g_free(ipc_cwd);
+    ipc_cwd = g_strdup(cwd);
+    if (refresh)
+    {
+      xfce_mixer_window_refresh_device ((XfceMixerWindow *) window);
+      refresh = FALSE;
+    }
+}
 
 int 
 main (int    argc,
       char **argv)
 {
-  GtkWidget *window;
+  SingleInstData inst;
   GError    *error = NULL;
 
   /* Setup translation domain */
@@ -65,7 +87,29 @@ main (int    argc,
   g_set_application_name (_("Mixer"));
 
   /* Initialize GTK+ */
-  gtk_init (&argc, &argv);
+  if(G_UNLIKELY(!gtk_init_with_args(&argc, &argv, " ", opt_entries, GETTEXT_PACKAGE, &error)))
+  {
+    g_print("%s\n", error->message);
+    g_error_free(error);
+    return 1;
+  }
+  /* ensure that there is only one instance of pcmanfm. */
+  inst.prog_name = "pimixer";
+  inst.cb = single_inst_cb;
+  inst.opt_entries = opt_entries;
+  inst.screen_num = gdk_x11_get_default_screen();
+  switch(single_inst_init(&inst))
+  {
+    case SINGLE_INST_CLIENT: /* we're not the first instance. */
+        single_inst_finalize(&inst);
+        gdk_notify_startup_complete();
+        return 0;
+    case SINGLE_INST_ERROR: /* error happened. */
+        single_inst_finalize(&inst);
+        return 1;
+    case SINGLE_INST_SERVER: ; /* FIXME */
+  }
+  if (refresh) return 1;
 
   /* Initialize Xfconf */
   if (G_UNLIKELY (!xfconf_init (&error)))
@@ -109,8 +153,6 @@ main (int    argc,
   /* Display the mixer window */
   gtk_widget_show (window);
 
-  g_bus_watch_name (G_BUS_TYPE_SESSION, "org.lxde.volumealsa", 0, volumealsa_device_changed, NULL, window, NULL);
-
   /* Enter the GTK+ main loop */
   gtk_main ();
 
@@ -123,5 +165,6 @@ main (int    argc,
   /* Shutdown Xfconf */
   xfconf_shutdown ();
 
+  single_inst_finalize(&inst);
   return EXIT_SUCCESS;
 }

@@ -412,9 +412,8 @@ xfce_mixer_window_update_contents (XfceMixerWindow *window)
     xfce_mixer_window_soundcard_changed (XFCE_MIXER_CARD_COMBO (window->soundcard_combo), card, window);
 }
 
-void volumealsa_device_changed (GDBusConnection *connection, const gchar *name, const gchar *name_owner, gpointer user_data)
+void xfce_mixer_window_refresh_device (XfceMixerWindow *window)
 {
-  XfceMixerWindow *window = (XfceMixerWindow *) user_data;
   GList *iter;
   gchar *active_card;
 

@@ -40,6 +40,7 @@ GType       xfce_mixer_window_get_type        (void) G_GNUC_CONST;
 
 GtkWidget  *xfce_mixer_window_new             (void);
 GstElement *xfce_mixer_window_get_active_card (XfceMixerWindow *window);
+void        xfce_mixer_window_refresh_device (XfceMixerWindow *window);
 
 G_END_DECLS;
 
