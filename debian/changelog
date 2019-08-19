@@ -1,3 +1,10 @@
+pimixer (0.20190819~113939) buster; urgency=medium
+
+  * Make compatible with new format for .asoundrc
+  * Use --refresh parameter to trigger an update rather than DBus
+
+ -- Simon Long <simon@raspberrypi.org>  Mon, 19 Aug 2019 11:39:39 +0100
+
 pimixer (0.20190218~130321) stretch; urgency=medium
 
   * Remove build dependencies on libxfce

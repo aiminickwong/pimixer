@@ -17,7 +17,8 @@ pimixer_SOURCES =							\
 	xfce-mixer-controls-dialog.c					\
 	xfce-mixer-controls-dialog.h					\
 	xfce-mixer-window.h						\
-	xfce-mixer-window.c
+	xfce-mixer-window.c \
+	single-inst.c
 
 pimixer_CFLAGS = 							\
 	-I$(top_builddir)						\
