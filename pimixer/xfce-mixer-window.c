@@ -358,7 +358,7 @@ xfce_mixer_window_action_use_card (GtkAction       *action,
 
   xfce_mixer_card_combo_update (XFCE_MIXER_CARD_COMBO (window->soundcard_combo), card);
 
-  system ("lxpanelctl command volumealsabt reconf");
+  system ("lxpanelctl command volumealsabt start");
 }
 
 static void

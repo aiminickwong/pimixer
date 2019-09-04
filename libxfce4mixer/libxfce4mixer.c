@@ -105,112 +105,111 @@ static int asound_get_default_card (void)
     char *res;
     int val;
 
-    /* first check to see if Bluetooth is in use */
-    if (find_in_section (user_config_file, "pcm.!default", "bluealsa"))
+    /* does .asoundrc exist? if not, default device is 0 */
+    if (!g_file_test (user_config_file, G_FILE_TEST_IS_REGULAR))
     {
         g_free (user_config_file);
-        return BLUEALSA_DEV;
+        return 0;
     }
 
-    /* if not, check for new format file */
-    res = get_string ("sed -n '/pcm.!default/,/}/{/slave.pcm/p}' %s 2>/dev/null | cut -d '\"' -f 2 | cut -d : -f 2", user_config_file);
-    if (sscanf (res, "%d", &val) == 1)
+    /* does .asoundrc use type asym? */
+    if (find_in_section (user_config_file, "pcm.!default", "asym"))
     {
+        /* look in pcm.output section for bluealsa */
+        if (find_in_section (user_config_file, "pcm.output", "bluealsa"))
+        {
+            g_free (user_config_file);
+            return BLUEALSA_DEV;
+        }
+
+        /* otherwise parse pcm.output section for card number */
+        res = get_string ("sed -n '/pcm.output/,/}/{/card/p}' %s 2>/dev/null | cut -d ' ' -f 2", user_config_file);
+        if (sscanf (res, "%d", &val) != 1) val = -1;
+    }
+    else
+    {
+        /* first check to see if Bluetooth is in use */
+        if (find_in_section (user_config_file, "pcm.!default", "bluealsa"))
+        {
+            g_free (user_config_file);
+            return BLUEALSA_DEV;
+        }
+
+        /* if not, check for new format file */
+        res = get_string ("sed -n '/pcm.!default/,/}/{/slave.pcm/p}' %s 2>/dev/null | cut -d '\"' -f 2 | cut -d : -f 2", user_config_file);
+        if (sscanf (res, "%d", &val) == 1) goto DONE;
         g_free (res);
-        g_free (user_config_file);
-        return val;
+
+        /* if not, check for old format file */
+        res = get_string ("sed -n '/pcm.!default/,/}/{/card/p}' %s 2>/dev/null | cut -d ' ' -f 2", user_config_file);
+        if (sscanf (res, "%d", &val) == 1) goto DONE;
+
+        /* nothing valid found, default device is 0 */
+        val = 0;
     }
 
-    /* if not, check for old format file */
-    g_free (res);
-    res = get_string ("sed -n '/pcm.!default/,/}/{/card/p}' %s 2>/dev/null | cut -d ' ' -f 2", user_config_file);
-    if (sscanf (res, "%d", &val) == 1)
-    {
-        g_free (res);
-        g_free (user_config_file);
-        return val;
-    }
-
-    g_free (res);
+    DONE: g_free (res);
     g_free (user_config_file);
-    return 0;
+    return val;
 }
 
 static void asound_set_default_card (int num)
 {
     char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
 
-    /* check file exists - write default contents if not */
+    /* does .asoundrc exist? if not, write default contents and exit */
     if (!g_file_test (user_config_file, G_FILE_TEST_IS_REGULAR))
     {
-        vsystem ("echo 'pcm.!default {\n\ttype plug\n\tslave.pcm \"hw:%d\"\n}\n\nctl.!default {\n\ttype hw\n\tcard %d\n}\n' >> %s", num, num, user_config_file);
-        g_free (user_config_file);
-        return;
+        vsystem ("echo 'pcm.!default {\n\ttype asym\n\tplayback.pcm {\n\t\ttype plug\n\t\tslave.pcm \"output\"\n\t}\n\tcapture.pcm {\n\t\ttype plug\n\t\tslave.pcm \"input\"\n\t}\n}\n\npcm.output {\n\ttype hw\n\tcard %d\n}\n\nctl.!default {\n\ttype hw\n\tcard %d\n}' >> %s", num, num, user_config_file);
+        goto DONE;
     }
 
-    /* check for new pcm.default section */
-    if (find_in_section (user_config_file, "pcm.!default", "'slave.pcm \".*\"'"))
+    /* does .asoundrc use type asym? if not, replace file with default contents and exit */
+    if (!find_in_section (user_config_file, "pcm.!default", "asym"))
     {
-        /* file is in new format already, so update in place */
-        vsystem ("sed -i '/pcm.!default/,/}/ { s/slave.pcm .*/slave.pcm \"hw:%d\"/ }' %s", num, user_config_file);
+        vsystem ("echo 'pcm.!default {\n\ttype asym\n\tplayback.pcm {\n\t\ttype plug\n\t\tslave.pcm \"output\"\n\t}\n\tcapture.pcm {\n\t\ttype plug\n\t\tslave.pcm \"input\"\n\t}\n}\n\npcm.output {\n\ttype hw\n\tcard %d\n}\n\nctl.!default {\n\ttype hw\n\tcard %d\n}' > %s", num, num, user_config_file);
+        goto DONE;
     }
-    else if (find_in_section (user_config_file, "pcm.!default", "slave.pcm"))
-    {
-        /* replace type in pcm section with type plug */
-        vsystem ("sed -i '/pcm.!default/,/}/ s/type .*/type plug/' %s", user_config_file);
 
-        /* replace slave.pcm {} section with slave.pcm "card ID" */
-        vsystem ("sed -i '/slave.pcm {/,/}/ { s/slave.pcm {/slave.pcm \"hw:%d\"/; /slave.pcm/!d }' %s", num, user_config_file);
-    }
+    /* is there a pcm.output section? if not, append one */
+    if (!find_in_section (user_config_file, "pcm.output", "type"))
+        vsystem ("echo '\npcm.output {\n\ttype hw\n\tcard %d\n}' >> %s", num, user_config_file);
+
+    /* update the pcm.output block if already present */
     else
+        vsystem ("sed -i '/pcm.output/,/}/c pcm.output {\\n\\ttype hw\\n\\tcard %d\\n}' %s", num, user_config_file);
+
+    /* does the file contain the ctl.!default block? if not, add one and exit */
+    if (!find_in_section (user_config_file, "ctl.!default", "type"))
     {
-        /* does the file contain an old format pcm.default section? */
-        if (find_in_section (user_config_file, "pcm.!default", "type") && find_in_section (user_config_file, "pcm.!default", "card"))
-        {
-            /* old format section found; update it to the new format */
-            vsystem ("sed -i '/pcm.!default/,/}/ { s/type .*/type plug\\n\\tslave.pcm \"hw:%d\"/ }' %s", num, user_config_file);
-            vsystem ("sed -i '/pcm.!default/,/}/ { /card .*/d }' %s", user_config_file);
-        }
-        else
-        {
-            /* append a pcm.default section in the new format */
-            vsystem ("echo '\npcm.!default {\n\ttype plug\n\tslave.pcm \"hw:%d\"\n}\n' >> %s", num, user_config_file);
-        }
+        vsystem ("echo '\nctl.!default {\n\ttype hw\n\tcard %d\n}' >> %s", num, user_config_file);
+        goto DONE;
     }
 
-    /* check for ctl.default section */
-    if (find_in_section (user_config_file, "ctl.!default", "type"))
-    {
-        if (find_in_section (user_config_file, "ctl.!default", "card"))
-        {
-            /* standard ctl.default section found; update both type and card */
-            vsystem ("sed -i '/ctl.!default/,/}/ { s/type .*/type hw/g; s/card .*/card %d/g; }' %s", num, user_config_file);
-        }
-        else
-        {
-            /* ctl has type but not card - probably bluetooth then, so replace type and add card */
-            vsystem ("sed -i '/ctl.!default/,/}/ { s/type .*/type hw\\n\\tcard %d/g; }' %s", num, user_config_file);
-        }
-    }
-    else
-    {
-        /* append a ctl.default section */
-        vsystem ("echo '\nctl.!default {\n\ttype hw\n\tcard %d\n}\n' >> %s", num, user_config_file);
-    }
+    /* update the ctl block */
+    vsystem ("sed -i '/ctl.!default/,/}/c ctl.!default {\\n\\ttype hw\\n\\tcard %d\\n}' %s", num, user_config_file);
 
-    g_free (user_config_file);
+    DONE: g_free (user_config_file);
 }
 
 static char *asound_get_bt_device (void)
 {
     char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
-    char *res = get_string ("sed -n '/pcm.!default/,/}/{/device/p}' %s 2>/dev/null | cut -d '\"' -f 2 | tr : _", user_config_file);
-    g_free (user_config_file);
+    char *res;
 
-    if (strlen (res) == 17) return res;
+    /* first check the pcm.output section */
+    res = get_string ("sed -n '/pcm.output/,/}/{/device/p}' %s 2>/dev/null | cut -d '\"' -f 2 | tr : _", user_config_file);
+    if (strlen (res) == 17) goto DONE;
+    else g_free (res);
 
-    g_free (res);
-    return NULL;
+    /* if nothing there, check the default block */
+    res = get_string ("sed -n '/pcm.!default/,/}/{/device/p}' %s 2>/dev/null | cut -d '\"' -f 2 | tr : _", user_config_file);
+    if (strlen (res) == 17) goto DONE;
+    else g_free (res);
+
+    res = NULL;
+    DONE: g_free (user_config_file);
+    return res;
 }
 
 /* modified version of bt_disconnect_device from volumealsabt.c */
