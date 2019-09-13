@@ -153,6 +153,12 @@ static int asound_get_default_card (void)
     return val;
 }
 
+/* Standard text blocks used in .asoundrc for ALSA (_A) and Bluetooth (_B) devices */
+#define PREFIX      "pcm.!default {\n\ttype asym\n\tplayback.pcm {\n\t\ttype plug\n\t\tslave.pcm \"output\"\n\t}\n\tcapture.pcm {\n\t\ttype plug\n\t\tslave.pcm \"input\"\n\t}\n}"
+#define OUTPUT_A    "\npcm.output {\n\ttype hw\n\tcard %d\n}"
+#define INPUT_A     "\npcm.input {\n\ttype hw\n\tcard %d\n}"
+#define CTL_A       "\nctl.!default {\n\ttype hw\n\tcard %d\n}"
+
 static void asound_set_default_card (int num)
 {
     char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
@@ -160,34 +166,56 @@ static void asound_set_default_card (int num)
     /* does .asoundrc exist? if not, write default contents and exit */
     if (!g_file_test (user_config_file, G_FILE_TEST_IS_REGULAR))
     {
-        vsystem ("echo 'pcm.!default {\n\ttype asym\n\tplayback.pcm {\n\t\ttype plug\n\t\tslave.pcm \"output\"\n\t}\n\tcapture.pcm {\n\t\ttype plug\n\t\tslave.pcm \"input\"\n\t}\n}\n\npcm.output {\n\ttype hw\n\tcard %d\n}\n\nctl.!default {\n\ttype hw\n\tcard %d\n}' >> %s", num, num, user_config_file);
+        vsystem ("echo '" PREFIX "\n" OUTPUT_A "\n" CTL_A "' >> %s", num, num, user_config_file);
         goto DONE;
     }
 
     /* does .asoundrc use type asym? if not, replace file with default contents and exit */
     if (!find_in_section (user_config_file, "pcm.!default", "asym"))
     {
-        vsystem ("echo 'pcm.!default {\n\ttype asym\n\tplayback.pcm {\n\t\ttype plug\n\t\tslave.pcm \"output\"\n\t}\n\tcapture.pcm {\n\t\ttype plug\n\t\tslave.pcm \"input\"\n\t}\n}\n\npcm.output {\n\ttype hw\n\tcard %d\n}\n\nctl.!default {\n\ttype hw\n\tcard %d\n}' > %s", num, num, user_config_file);
+        vsystem ("echo '" PREFIX "\n" OUTPUT_A "\n" CTL_A "' > %s", num, num, user_config_file);
         goto DONE;
     }
 
-    /* is there a pcm.output section? if not, append one */
+    /* is there a pcm.output section? update it if so; if not, append one */
     if (!find_in_section (user_config_file, "pcm.output", "type"))
-        vsystem ("echo '\npcm.output {\n\ttype hw\n\tcard %d\n}' >> %s", num, user_config_file);
-
-    /* update the pcm.output block if already present */
+        vsystem ("echo '" OUTPUT_A "' >> %s", num, user_config_file);
     else
         vsystem ("sed -i '/pcm.output/,/}/c pcm.output {\\n\\ttype hw\\n\\tcard %d\\n}' %s", num, user_config_file);
 
-    /* does the file contain the ctl.!default block? if not, add one and exit */
+    /* is there a ctl.!default section? update it if so; if not, append one */
     if (!find_in_section (user_config_file, "ctl.!default", "type"))
+        vsystem ("echo '" CTL_A "' >> %s", num, user_config_file);
+    else
+        vsystem ("sed -i '/ctl.!default/,/}/c ctl.!default {\\n\\ttype hw\\n\\tcard %d\\n}' %s", num, user_config_file);
+
+    DONE: g_free (user_config_file);
+    vsystem ("pimixer --refresh");
+}
+
+static void asound_set_default_input (int num)
+{
+    char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
+
+    /* does .asoundrc exist? if not, write default contents and exit */
+    if (!g_file_test (user_config_file, G_FILE_TEST_IS_REGULAR))
     {
-        vsystem ("echo '\nctl.!default {\n\ttype hw\n\tcard %d\n}' >> %s", num, user_config_file);
+        vsystem ("echo '" PREFIX "\n" OUTPUT_A "\n" INPUT_A "\n" CTL_A "' >> %s", 0, num, 0, user_config_file);
         goto DONE;
     }
 
-    /* update the ctl block */
-    vsystem ("sed -i '/ctl.!default/,/}/c ctl.!default {\\n\\ttype hw\\n\\tcard %d\\n}' %s", num, user_config_file);
+    /* does .asoundrc use type asym? if not, replace file with default contents and exit */
+    if (!find_in_section (user_config_file, "pcm.!default", "asym"))
+    {
+        vsystem ("echo '" PREFIX "\n" OUTPUT_A "\n" INPUT_A "\n" CTL_A"' > %s", 0, num, 0, user_config_file);
+        goto DONE;
+    }
+
+    /* is there a pcm.input section? update it if so; if not, append one */
+    if (!find_in_section (user_config_file, "pcm.input", "type"))
+        vsystem ("echo '" INPUT_A "' >> %s", num, user_config_file);
+    else
+        vsystem ("sed -i '/pcm.input/,/}/c pcm.input {\\n\\ttype hw\\n\\tcard %d\\n}' %s", num, user_config_file);
 
     DONE: g_free (user_config_file);
 }
@@ -195,7 +223,7 @@ static void asound_set_default_card (int num)
 static char *asound_get_bt_device (void)
 {
     char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
-    char *res;
+    char *res, *ret = NULL;
 
     /* first check the pcm.output section */
     res = get_string ("sed -n '/pcm.output/,/}/{/device/p}' %s 2>/dev/null | cut -d '\"' -f 2 | tr : _", user_config_file);
@@ -209,32 +237,48 @@ static char *asound_get_bt_device (void)
 
     res = NULL;
     DONE: g_free (user_config_file);
-    return res;
+    if (res)
+    {
+        ret = g_strdup_printf ("/org/bluez/hci0/dev_%s", res);
+        g_free (res);
+    }
+    return ret;
+}
+
+static char *asound_get_bt_input (void)
+{
+    char *user_config_file = g_build_filename (g_get_home_dir (), "/.asoundrc", NULL);
+    char *res, *ret = NULL;
+
+    /* check the pcm.input section */
+    res = get_string ("sed -n '/pcm.input/,/}/{/device/p}' %s 2>/dev/null | cut -d '\"' -f 2 | tr : _", user_config_file);
+    if (strlen (res) == 17) goto DONE;
+    else g_free (res);
+
+    res = NULL;
+    DONE: g_free (user_config_file);
+    if (res)
+    {
+        ret = g_strdup_printf ("/org/bluez/hci0/dev_%s", res);
+        g_free (res);
+    }
+    return ret;
 }
 
 /* modified version of bt_disconnect_device from volumealsabt.c */
 
-static void disconnect_device (void)
+static void disconnect_device (char *device)
 {
-    // get the name of the device with the current sink number
-    char *device = asound_get_bt_device ();
-    if (device)
+    GDBusObjectManager *objmanager = g_dbus_object_manager_client_new_for_bus_sync (G_BUS_TYPE_SYSTEM, 0, "org.bluez", "/", NULL, NULL, NULL, NULL, NULL);
+    if (objmanager)
     {
-        char *buffer = g_strdup_printf ("/org/bluez/hci0/dev_%s", device);
-        // call the disconnect method on BlueZ
-        GDBusObjectManager *objmanager = g_dbus_object_manager_client_new_for_bus_sync (G_BUS_TYPE_SYSTEM, 0, "org.bluez", "/", NULL, NULL, NULL, NULL, NULL);
-        if (objmanager)
+        GDBusInterface *interface = g_dbus_object_manager_get_interface (objmanager, device, "org.bluez.Device1");
+        if (interface)
         {
-            GDBusInterface *interface = g_dbus_object_manager_get_interface (objmanager, buffer, "org.bluez.Device1");
-            if (interface)
-            {
-                g_dbus_proxy_call (G_DBUS_PROXY (interface), "Disconnect", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
-                g_object_unref (interface);
-            }
-            g_object_unref (objmanager);
+            // call the disconnect method on BlueZ
+            g_dbus_proxy_call (G_DBUS_PROXY (interface), "Disconnect", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
+            g_object_unref (interface);
         }
-        g_free (buffer);
-        g_free (device);
     }
 }
 
@@ -503,8 +547,18 @@ _xfce_mixer_destroy_mixer (GstMixer *mixer)
 
 void xfce_mixer_set_default_card (char *id)
 {
-  disconnect_device ();
-  asound_set_default_card (xfce_mixer_get_card_num (id));
+  char *obt = asound_get_bt_device ();
+  char *ibt = asound_get_bt_input ();
+  int num = xfce_mixer_get_card_num (id);
+
+  asound_set_default_card (num);
+  asound_set_default_input (num);
+
+  if (obt) disconnect_device (obt);
+  if (ibt && g_strcmp0 (ibt, obt)) disconnect_device (ibt);
+
+  if (obt) g_free (obt);
+  if (ibt) g_free (ibt);
 }
 
 
